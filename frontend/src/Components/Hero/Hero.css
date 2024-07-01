@@ -1,0 +1,83 @@
+.hero {
+    height: 100vh;
+    background-image: url('../Assets/hero.jpg');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    color: white;
+  }
+  
+  .hero-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 180px;
+  }
+  
+  .hero-text {
+    max-width: 600px;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    margin: -100px 0 20px 0; /* Remontez l'arrière-plan */
+  }
+  
+  .hero-text h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
+    color: white;
+  }
+  
+  .hero-text p {
+    font-size: 18px;
+    line-height: 1.5;
+    margin-bottom: 15px;
+    color: white;
+  }
+  
+  .hero-latest-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    width: 200px;
+    height: 50px;
+    border-radius: 25px;
+    background: #ff4141;
+    color: white;
+    font-size: 18px;
+    font-weight: 500;
+    margin-top: 20px;
+  }
+  
+  .hero-latest-btn img {
+    width: 24px;
+    height: 24px;
+  }
+  /* Media Query pour les écrans de taille moyenne */
+@media (max-width: 1280px) {
+  .hero-left {
+    padding-left: 100px;
+  }
+  .hero-text h1 {
+    font-size: 24px;
+  }
+  .hero-text p {
+    font-size: 14px;
+  }
+  .hero-latest-btn {
+    width: 180px;
+    font-size: 14px;
+  }
+}
+
+/* Media Query pour les écrans plus petits */
+@media (max-width: 768px) {
+  .hero-left {
+    padding-left: 20px;
+  }
+  .hero-text {
+    margin-top: 20px; /* Réduction de la marge supérieure pour les écrans plus petits */
+  }
+}
