@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./ListProduct.css";
-import cross_icon from '../Assets/cross_icon.png'
+import cross_icon from '../Assets/cross_icon.png';
 import { backend_url, currency } from "../../App";
 
 const ListProduct = () => {
@@ -16,39 +16,34 @@ const ListProduct = () => {
   });
 
   const fetchInfo = () => {
-    fetch(`${backend_url}/allproducts`)
+    fetch(`${backend_url}/api/product/allproducts`)
       .then((res) => res.json())
-      .then((data) => setAllProducts(data))
+      .then((data) => setAllProducts(data));
   }
 
   useEffect(() => {
     fetchInfo();
-  }, [])
+  }, []);
 
-  
   const updateProduct = async (product) => {
-    await fetch(`${backend_url}/updateproduct`, {
-      method: 'PUT',  // Notez ici l'utilisation de la méthode PUT
+    await fetch(`${backend_url}/api/product/updateproduct`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(product),
     });
-  
+
     fetchInfo();
   }
 
-
-
   const removeProduct = async (id) => {
-    await fetch(`${backend_url}/removeproduct`, {
-      method: 'POST',
+    await fetch(`${backend_url}/api/product/removeproduct/${id}`, {
+      method: 'DELETE',
       headers: {
-        Accept: 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ id: id }),
-    })
+    });
 
     fetchInfo();
   }
@@ -96,7 +91,7 @@ const ListProduct = () => {
               <p>{currency}{e.new_price}</p>
               <p>{e.category}</p>
               <button onClick={() => handleEditClick(e)}>Edit</button>
-              <img className="listproduct-remove-icon" onClick={() => { removeProduct(e.id) }} src={cross_icon} alt="" />
+              <img className="listproduct-remove-icon" onClick={() => removeProduct(e.id)} src={cross_icon} alt="" />
             </div>
             {editingProduct === e.id && (
               <form onSubmit={handleFormSubmit}>

@@ -28,10 +28,10 @@ const LoginSignup = () => {
   const handleRedirect = async () => {
     try {
       const user = await fetchUserDetails();
-      if (user.role === 'user') {
-        window.location.replace('/');
-      } else if (user.role === 'admin') {
-        window.location.replace('/login')
+      if (user.role === 'admin') {
+        window.location.replace('/listproduct')
+      } else {
+        alert('please try with correct email/password');
       }
     } catch (error) {
       alert('Failed to fetch user details');
@@ -41,15 +41,10 @@ const LoginSignup = () => {
   const login = async () => {
     try {
       const response = await axios.post('http://localhost:4000/api/auth/login', formData);
-      if (response.data.role === 'admin') {
-        // await handleRedirect(); // Directly handle redirect for admin
-        alert('please try with correct email/password');
-      } else {
-        localStorage.setItem('auth-token', response.data.token); // Store token for regular user
-        await handleRedirect();
-      }
+      localStorage.setItem('auth-token', response.data.token);
+      await handleRedirect();
     } catch (error) {
-      alert(error.response.data.errors);
+      alert("Login failed: " + error.response.data.errors);
     }
   };
 

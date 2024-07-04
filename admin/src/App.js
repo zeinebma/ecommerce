@@ -1,21 +1,70 @@
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useNavigate } from "react-router-dom";
 import Footer from "./Components/Footer/Footer";
 import Navbar from "./Components/Navbar/Navbar";
 import Admin from "./Pages/Admin";
+import NotFound from "./Components/error/notFound";
+import LoginSignup from "./Pages/LoginSignup";
+import axios from 'axios';
+import { useEffect, useState } from "react";
 
 export const backend_url = 'http://localhost:4000';
 export const currency = '$';
 
 function App() {
+
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [loggedOut, setLoggedOut] = useState(false);
+  const navigate = useNavigate();
+
+  const fetchUserDetails = async () => {
+    try {
+      const token = localStorage.getItem('auth-token');
+      const response = await axios.get(`${backend_url}/api/auth/user`, {
+        headers: { 'auth-token': token }
+      });
+      setUser(response.data.user);
+    } catch (error) {
+      console.error('Failed to fetch user details:', error);
+      navigate('/login');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!loggedOut) {
+      fetchUserDetails();
+    }
+  }, [loggedOut]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('auth-token');
+    setUser(null);
+    setLoggedOut(true);
+    navigate('/login');
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <BrowserRouter>
-      <div>
-        <Navbar />
-        <Admin />
-        <Footer />
-      </div>
-    </BrowserRouter>
-  );
+    <div>
+      {user && user.role === 'admin' ? (
+        <>
+          <Navbar user={user} handleLogout={handleLogout} />
+          <Admin />
+          <Footer />
+        </>
+      ) : (
+          <Routes>
+            <Route path="/login" element={<LoginSignup />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+      )}
+    </div>
+  )
 }
 
 export default App;

@@ -10,27 +10,27 @@ const Shop = () => {
   const [popular, setPopular] = useState([]);
   const [newcollection, setNewCollection] = useState([]);
 
-  const fetchInfo = () => { 
-    fetch('http://localhost:4000/popularinwomen') 
-            .then((res) => res.json()) 
-            .then((data) => setPopular(data))
-    fetch('http://localhost:4000/newcollections') 
-            .then((res) => res.json()) 
-            .then((data) => setNewCollection(data))
-    }
+  const fetchInfo = () => {
+    fetch('http://localhost:4000/api/product/popularinwomen')
+      .then((res) => res.json())
+      .then((data) => setPopular(data))
+    fetch('http://localhost:4000/api/product/newcollections')
+      .then((res) => res.json())
+      .then((data) => setNewCollection(data))
+  }
 
-    useEffect(() => {
-      fetchInfo();
-    }, [])
+  useEffect(() => {
+    fetchInfo();
+  }, [])
 
 
   return (
     <div>
-      <Hero/>
-      <Popular data={popular}/>
-      <Offers/>
-      <NewCollections data={newcollection}/>
-      <NewsLetter/>
+      <Hero />
+      <Popular data={popular} />
+      <Offers />
+      <NewCollections data={newcollection} />
+      <NewsLetter />
     </div>
   )
 }

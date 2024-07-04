@@ -8,6 +8,7 @@ import ShopCategory from "./Pages/ShopCategory";
 import women_banner from "./Components/Assets/banner_women.png";
 import men_banner from "./Components/Assets/banner_mens.PNG";
 import LoginSignup from "./Pages/LoginSignup";
+import NotFound from "./Components/error/notFound";
 
 
 export const backend_url = 'http://localhost:4000';
@@ -28,7 +29,8 @@ function App() {
             <Route path=':productId' element={<Product />} />
           </Route>
           <Route path="/cart" element={<Cart />} />
-          <Route path="/login" element={<LoginSignup/>} />
+          <Route path="/login" element={<LoginSignup />} />
+          <Route path="/*" element={<NotFound />} />
         </Routes>
         <Footer />
       </Router>

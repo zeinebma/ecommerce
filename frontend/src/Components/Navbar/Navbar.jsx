@@ -18,6 +18,15 @@ const Navbar = () => {
     e.target.classList.toggle('open');
   }
 
+  const handleLogout = () => {
+    // Supprimer token, isAuth du stockage local
+    localStorage.removeItem('auth-token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('cartItems');
+    // Rediriger vers la page de connexion
+    window.location.replace("/");
+  };
+
   return (
     <div className='nav'>
       <Link to='/' onClick={() => { setMenu("shop") }} style={{ textDecoration: 'none' }} className="nav-logo">
@@ -32,7 +41,7 @@ const Navbar = () => {
       </ul>
       <div className="nav-login-cart">
         {localStorage.getItem('auth-token')
-          ? <button onClick={() => { localStorage.removeItem('auth-token'); window.location.replace("/"); }}>Logout</button>
+          ? <button onClick={handleLogout}>Logout</button>
           : <Link to='/login' style={{ textDecoration: 'none' }}><button>Login</button></Link>}
         <Link to="/cart"><img src={cart_icon} alt="cart" /></Link>
         <div className="nav-cart-count">{getTotalCartItems()}</div>

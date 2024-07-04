@@ -34,7 +34,7 @@ const AddProduct = () => {
 
     if (dataObj.success) {
       product.image = dataObj.image_url;
-      await fetch(`${backend_url}/addproduct`, {
+      await fetch(`${backend_url}/api/product/addproduct`, {
         method: 'POST',
         headers: {
           Accept: 'application/json',
