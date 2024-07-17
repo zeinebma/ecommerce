@@ -1,29 +1,26 @@
-import React, { useContext, useRef, useState } from 'react'
-import './Navbar.css'
-import { Link } from 'react-router-dom'
-import logo from '../Assets/logo.png'
-import cart_icon from '../Assets/cart_icon.png'
-import { ShopContext } from '../../Context/ShopContext'
-import nav_dropdown from '../Assets/nav_dropdown.png'
+import React, { useContext, useRef, useState } from 'react';
+import './Navbar.css';
+import { Link } from 'react-router-dom';
+import logo from '../Assets/logo.png';
+import cart_icon from '../Assets/cart_icon.png';
+import { ShopContext } from '../../Context/ShopContext';
+import nav_dropdown from '../Assets/nav_dropdown.png';
 
 const Navbar = () => {
-
   let [menu, setMenu] = useState("shop");
-  const { getTotalCartItems } = useContext(ShopContext);
+  const { getTotalCartItems, user } = useContext(ShopContext);
 
   const menuRef = useRef();
 
   const dropdown_toggle = (e) => {
     menuRef.current.classList.toggle('nav-menu-visible');
     e.target.classList.toggle('open');
-  }
+  };
 
   const handleLogout = () => {
-    // Supprimer token, isAuth du stockage local
     localStorage.removeItem('auth-token');
     localStorage.removeItem('role');
     localStorage.removeItem('cartItems');
-    // Rediriger vers la page de connexion
     window.location.replace("/");
   };
 
@@ -36,18 +33,18 @@ const Navbar = () => {
       <img onClick={dropdown_toggle} className='nav-dropdown' src={nav_dropdown} alt="" />
       <ul ref={menuRef} className="nav-menu">
         <li onClick={() => { setMenu("shop") }}><Link to='/' style={{ textDecoration: 'none' }}>Shop</Link>{menu === "shop" ? <hr /> : <></>}</li>
-        <li onClick={() => { setMenu("vetements") }}><Link to='/Vetements' style={{ textDecoration: 'none' }}>Vêtements et Accessoires</Link>{menu === "Vetements" ? <hr /> : <></>}</li>
-        <li onClick={() => { setMenu("equipements") }}><Link to='/equipements' style={{ textDecoration: 'none' }}>Équipement de Camping</Link>{menu === "equipements" ? <hr /> : <></>}</li>
+        <li onClick={() => { setMenu("vetements") }}><Link to='/category/vetements' style={{ textDecoration: 'none' }}>Vêtements et Accessoires</Link>{menu === "vetements" ? <hr /> : <></>}</li>
+        <li onClick={() => { setMenu("equipements") }}><Link to='/category/equipements' style={{ textDecoration: 'none' }}>Équipement de Camping</Link>{menu === "equipements" ? <hr /> : <></>}</li>
       </ul>
       <div className="nav-login-cart">
         {localStorage.getItem('auth-token')
           ? <button onClick={handleLogout}>Logout</button>
           : <Link to='/login' style={{ textDecoration: 'none' }}><button>Login</button></Link>}
-        <Link to="/cart"><img src={cart_icon} alt="cart" /></Link>
+        <Link to={`/cart/${user?.id}`}><img src={cart_icon} alt="cart" /></Link>
         <div className="nav-cart-count">{getTotalCartItems()}</div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;

@@ -31,16 +31,31 @@ exports.signup = async (req, res) => {
     if (check) {
         return res.status(400).json({ success: success, errors: "existing user found with this email" });
     }
-    let cart = {};
-    for (let i = 0; i < 300; i++) {
-        cart[i] = 0;
-    }
     const user = new User({
         name: req.body.username,
         email: req.body.email,
         password: req.body.password,
         role: req.body.role,
-        cartData: cart,
+    });
+    await user.save();
+    const data = { user: { id: user.id } };
+    const token = jwt.sign(data, process.env.SECRET_KEY);
+    success = true;
+    res.json({ success, token, role: user.role });
+};
+
+exports.addAdmin = async (req, res) => {
+    console.log("Sign Up");
+    let success = false;
+    let check = await User.findOne({ where: { email: req.body.email } });
+    if (check) {
+        return res.status(400).json({ success: success, errors: "existing user found with this email" });
+    }
+    const user = new User({
+        name: req.body.username,
+        email: req.body.email,
+        password: req.body.password,
+        role: 'admin',
     });
     await user.save();
     const data = { user: { id: user.id } };
@@ -66,3 +81,43 @@ exports.getUserDetails = async (req, res) => {
         res.status(400).json({ error: "Invalid Token" });
     }
 };
+
+exports.getAllUser = async (req, res) => {
+    const users = await User.findAll();
+    res.json(users);
+}
+
+exports.editUser = async (req, res) => {
+    const { id, role } = req.body;
+    try {
+        const result = await User.findByPk(id);
+        if (result) {
+
+            result.role = role;
+            await result.save();
+            res.json({ success: true, message: "User updated successfully", result });
+        } else {
+            res.status(404).json({ success: false, message: "user not found" });
+        }
+    } catch (error) {
+        console.error("Error updating user:", error);
+        res.status(500).json({ success: false, message: "An error occurred while updating the user" });
+    }
+};
+
+exports.deleteUser = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = await User.destroy({ where: { id: id } });
+        if (result) {
+            res.json({ success: true, message: "User deleted successfully" });
+        } else {
+            res.status(404).json({ success: false, message: "user not found" });
+        }
+    } catch (error) {
+        console.error("Error deleting user:", error);
+        res.status(500).json({
+            success: false, message: "An error occurred while deleting the user"
+        });
+    }
+}

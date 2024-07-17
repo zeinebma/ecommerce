@@ -1,12 +1,17 @@
 const express = require('express');
-const { fetchuser } = require('../Middlewares/userMiddleware');
-const { addtocart, getcart, removefromcart } = require('../controllers/cartController');
+const { addProductToCart, getCartItems, removeCartItem, updateCartItemQuantity, removeAllCart, removeAllItemsInCart } = require('../controllers/cartController');
 const router = express.Router();
 
+router.post('/add', addProductToCart)
+    .get('/:userId', getCartItems)
+    .delete('/remove/:userId/:productId', removeCartItem)
+    .put('/update', updateCartItemQuantity)
+    .get('/cartId', (req, res) => {
+        if (req.session && req.session.cartId) {
+            res.json({ cartId: req.session.cartId });
+        } else {
+            res.status(404).json({ error: 'Cart ID not found' });
+        }
+    });
 
-router
-    .post('/addtocart', fetchuser, addtocart)
-    .post('/getcart', fetchuser, getcart)
-    .post('/removefromcart', fetchuser, removefromcart)
-
-module.exports = router
+module.exports = router;

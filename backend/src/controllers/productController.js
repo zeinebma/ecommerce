@@ -1,11 +1,28 @@
+const Category = require('../models/category');
 const Product = require('../models/product')
 
 
 exports.allProducts = async (req, res) => {
-    let products = await Product.findAll();
-    console.log("All Products");
-    res.send(products);
+    try {
+        const products = await Product.findAll({
+            include: Category // Include the Category model
+        });
+        res.json(products);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 };
+
+
+exports.getProductById = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const product = await Product.findByPk(id);
+        res.json(product);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
 
 
 exports.newCollections = async (req, res) => {
@@ -16,8 +33,9 @@ exports.newCollections = async (req, res) => {
 };
 
 
-exports.popularinWomen = async (req, res) => {
-    let products = await Product.findAll({ where: { category: "equipements" } });
+exports.popularProduct = async (req, res) => {
+    const category = await Category.findOne({ where: { name: 'vetements' } });
+    let products = await Product.findAll({ where: { categoryId: category.id } });
     let arr = products.splice(0, 4);
     console.log("Popular In equipements");
     res.send(arr);
@@ -26,52 +44,80 @@ exports.popularinWomen = async (req, res) => {
 
 exports.relatedProducts = async (req, res) => {
     console.log("Related Products");
-    const { category } = req.body;
-    const products = await Product.findAll({ where: { category } });
+    const { categoryId } = req.body;
+    const products = await Product.findAll({ where: { categoryId } });
     const arr = products.slice(0, 4);
     res.send(arr);
 };
 
-
-exports.addproduct = async (req, res) => {
-    let products = await Product.findAll();
-    let id;
-    if (products.length > 0) {
-        let last_product_array = products.slice(-1);
-        let last_product = last_product_array[0];
-        id = last_product.id + 1;
-    } else {
-        id = 1;
+// Route to get products by category name
+exports.productByCat = async (req, res) => {
+    const { categoryName } = req.params;
+    try {
+        const category = await Category.findOne({ where: { name: categoryName } });
+        if (!category) {
+            return res.status(404).json({ error: 'Category not found' });
+        }
+        const products = await Product.findAll({ where: { categoryId: category.id } });
+        res.json(products);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-    const product = new Product({
-        id: id,
-        name: req.body.name,
-        description: req.body.description,
-        image: req.body.image,
-        category: req.body.category,
-        new_price: req.body.new_price,
-        old_price: req.body.old_price,
-    });
-    await product.save();
-    console.log("Saved");
-    res.json({ success: true, name: req.body.name });
 };
 
 
-exports.updateProduct = async (req, res) => {
-    const { id, name, old_price, new_price, category, image } = req.body;
+exports.addproduct = async (req, res) => {
+    const { name, description, new_price, old_price, categoryId } = req.body;
+    try {
+        const category = await Category.findByPk(categoryId);
+        if (!category) {
+            return res.status(404).json({ error: 'Category not found' });
+        }
+        const imageUrl = `http://localhost:4000/images/${req.file.filename}`;
 
+        const product = await Product.create({
+            name,
+            description,
+            image: imageUrl,
+            new_price,
+            old_price,
+            categoryId: category.id
+        });
+
+        res.json(product);
+        console.log(product.image);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+exports.updateProduct = async (req, res) => {
+    const { id } = req.params;
+    const { name, old_price, new_price, categoryId } = req.body;
     try {
         const product = await Product.findByPk(id);
         if (product) {
+            const category = await Category.findByPk(categoryId);
+            if (!category) {
+                return res.status(404).json({ success: false, message: "Category not found" });
+            }
+
+            // Check if req.file exists and then update image accordingly
+            let imageUrl = product.image; // Default to existing image
+            if (req.file) {
+                imageUrl = `http://localhost:4000/images/${req.file.filename}`;
+            }
+
+            // Update product properties
             product.name = name;
             product.old_price = old_price;
             product.new_price = new_price;
-            product.category = category;
-            product.image = image;
+            product.categoryId = category.id;
+            product.image = imageUrl;
+
             await product.save();
-            console.log("Product updated");
-            res.json({ success: true, message: "Product updated successfully" });
+
+            res.json({ success: true, message: "Product updated successfully", product });
         } else {
             res.status(404).json({ success: false, message: "Product not found" });
         }
@@ -80,6 +126,7 @@ exports.updateProduct = async (req, res) => {
         res.status(500).json({ success: false, message: "An error occurred while updating the product" });
     }
 };
+
 
 
 exports.removeproduct = async (req, res) => {

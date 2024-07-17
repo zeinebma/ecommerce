@@ -2,38 +2,62 @@ import React, { useEffect, useState } from "react";
 import "./ListProduct.css";
 import cross_icon from '../Assets/cross_icon.png';
 import { backend_url, currency } from "../../App";
+import EditProduct from '../EditProduct/EditProduct';
+import add_product_icon from '../Assets/Product_Cart.svg';
+import { Link } from 'react-router-dom';
 
 const ListProduct = () => {
+  const [image, setImage] = useState(null);
   const [allproducts, setAllProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [formData, setFormData] = useState({
+  const [data, setdata] = useState({
     id: "",
     name: "",
     old_price: "",
     new_price: "",
-    category: "",
-    image: ""
+    categoryId: "",
   });
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState([]);
 
   const fetchInfo = () => {
     fetch(`${backend_url}/api/product/allproducts`)
       .then((res) => res.json())
       .then((data) => setAllProducts(data));
-  }
+  };
+
+  const fetchCategories = () => {
+    fetch(`${backend_url}/api/category/categories`)
+      .then((res) => res.json())
+      .then((data) => setCategories(data));
+  };
 
   useEffect(() => {
     fetchInfo();
+    fetchCategories();
   }, []);
 
-  const updateProduct = async (product) => {
-    await fetch(`${backend_url}/api/product/updateproduct`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(product),
-    });
+  const updateProduct = async () => {
+    let formdata = new FormData();
+    formdata.append('name', data.name);
+    formdata.append('description', data.description);
+    formdata.append('categoryId', data.categoryId);
+    formdata.append('new_price', data.new_price);
+    formdata.append('old_price', data.old_price);
+    if (image) {
+      formdata.append('image', image);
+    }
 
+    const addProductResponse = await fetch(`${backend_url}/api/product/updateproduct/${data.id}`, {
+      method: 'PUT',
+      body: formdata,
+    });
+    const addProductResponseJson = await addProductResponse.json();
+    if (addProductResponseJson.status === 'success') {
+      setEditingProduct(null);
+      setModalOpen(false);
+    }
     fetchInfo();
   }
 
@@ -44,87 +68,122 @@ const ListProduct = () => {
         'Content-Type': 'application/json',
       },
     });
-
     fetchInfo();
+  }
+
+  const removeSelectedProducts = async () => {
+    for (const id of selectedProducts) {
+      await removeProduct(id);
+    }
+    setSelectedProducts([]);
   }
 
   const handleEditClick = (product) => {
     setEditingProduct(product.id);
-    setFormData({
+    setdata({
       id: product.id,
       name: product.name,
       old_price: product.old_price,
       new_price: product.new_price,
-      category: product.category,
-      image: product.image
+      categoryId: product.categoryId,
     });
-  }
+    setModalOpen(true);
+
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setdata({
+      ...data,
       [name]: value
     });
-  }
+  };
 
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
+  const handleFormSubmit = (formData) => {
     updateProduct(formData);
     setEditingProduct(null);
-  }
+    setModalOpen(false);
+    setImage(null)
+  };
+
+  const getCategoryName = (categoryId) => {
+    const category = categories.find(cat => cat.id === categoryId);
+    return category ? category.name : 'Unknown';
+  };
+
+  const handleCheckboxChange = (e, productId) => {
+    if (e.target.checked) {
+      setSelectedProducts([...selectedProducts, productId]);
+    } else {
+      setSelectedProducts(selectedProducts.filter(id => id !== productId));
+    }
+  };
+
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      const allProductIds = allproducts.map(product => product.id);
+      setSelectedProducts(allProductIds);
+    } else {
+      setSelectedProducts([]);
+    }
+  };
 
   return (
     <div className="listproduct">
       <h1>All Products List</h1>
+      <div style={{ position: 'absolute', right: '40px' }}>
+        <Link to='/addproduct' className="button-17">
+          <p>+ Add Product</p>
+        </Link>
+      </div>
+      {selectedProducts.length > 0 &&
+        <button onClick={removeSelectedProducts} className="button-17">Remove Selected</button>
+      }
       <div className="listproduct-format-main">
-        <p>Products</p> <p>Title</p> <p>Old Price</p> <p>New Price</p> <p>Category</p> <p>Edit</p> <p>Remove</p>
+        <input type="checkbox"
+          onChange={handleSelectAll}
+          style={{ height: '20px', cursor: "pointer", }}
+        />
+        <p>Products</p> <p>Title</p> <p>Old Price</p> <p>New</p> <p>Category</p> <p>Actions</p>
       </div>
       <div className="listproduct-allproducts">
         <hr />
-        {allproducts.map((e, index) => (
+        {allproducts.map((product, index) => (
           <div key={index}>
             <div className="listproduct-format-main listproduct-format">
-              <img className="listproduct-product-icon" src={backend_url + e.image} alt="" />
-              <p className="cartitems-product-title">{e.name}</p>
-              <p>{currency}{e.old_price}</p>
-              <p>{currency}{e.new_price}</p>
-              <p>{e.category}</p>
-              <button onClick={() => handleEditClick(e)}>Edit</button>
-              <img className="listproduct-remove-icon" onClick={() => removeProduct(e.id)} src={cross_icon} alt="" />
+              <input
+                type="checkbox"
+                checked={selectedProducts.includes(product.id)}
+                onChange={(e) => handleCheckboxChange(e, product.id)}
+                style={{ height: '15px' }}
+              />
+              <img className="listproduct-product-icon" width={170} src={product.image} alt="" />
+              <p className="cartitems-product-title">{product.name}</p>
+              <p>{currency}{product.old_price}</p>
+              <p>{currency}{product.new_price}</p>
+              <p>{getCategoryName(product.categoryId)}</p>
+              <div className="action-btn">
+                <img src="https://cdn-icons-png.flaticon.com/128/1828/1828911.png" width={30} style={{ cursor: 'pointer' }} onClick={() => handleEditClick(product)} />
+                <img className="listproduct-remove-icon" onClick={() => removeProduct(product.id)} src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSckjmVT1OZgpy0bFGkIAitjAu8Ed6_e2CLCA&s" width={30} alt="" />
+              </div>
             </div>
-            {editingProduct === e.id && (
-              <form onSubmit={handleFormSubmit}>
-                <label>
-                  Name:
-                  <input type="text" name="name" value={formData.name} onChange={handleInputChange} />
-                </label>
-                <label>
-                  Old Price:
-                  <input type="number" name="old_price" value={formData.old_price} onChange={handleInputChange} />
-                </label>
-                <label>
-                  New Price:
-                  <input type="number" name="new_price" value={formData.new_price} onChange={handleInputChange} />
-                </label>
-                <label>
-                  Category:
-                  <input type="text" name="category" value={formData.category} onChange={handleInputChange} />
-                </label>
-                <label>
-                  Image URL:
-                  <input type="text" name="image" value={formData.image} onChange={handleInputChange} />
-                </label>
-                <button type="submit">Save</button>
-                <button type="button" onClick={() => setEditingProduct(null)}>Cancel</button>
-              </form>
-            )}
             <hr />
           </div>
         ))}
       </div>
+      {editingProduct && (
+        <EditProduct
+          open={modalOpen}
+          handleClose={() => setModalOpen(false)}
+          data={data}
+          handleInputChange={handleInputChange}
+          handleFormSubmit={handleFormSubmit}
+          categories={categories}
+          setImage={setImage}
+          image={image}
+        />
+      )}
     </div>
-  );
-};
-
+  )
+}
 export default ListProduct;

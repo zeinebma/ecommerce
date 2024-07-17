@@ -8,7 +8,7 @@ import axios from 'axios';
 import { useEffect, useState } from "react";
 
 export const backend_url = 'http://localhost:4000';
-export const currency = '$';
+export const currency = '€';
 
 function App() {
 
@@ -26,7 +26,7 @@ function App() {
       setUser(response.data.user);
     } catch (error) {
       console.error('Failed to fetch user details:', error);
-      navigate('/login');
+      navigate('/');
     } finally {
       setLoading(false);
     }
@@ -42,7 +42,7 @@ function App() {
     localStorage.removeItem('auth-token');
     setUser(null);
     setLoggedOut(true);
-    navigate('/login');
+    window.location.replace('/');
   };
 
   if (loading) {
@@ -55,13 +55,13 @@ function App() {
         <>
           <Navbar user={user} handleLogout={handleLogout} />
           <Admin />
-          <Footer />
+          {/* <Footer /> */}
         </>
       ) : (
-          <Routes>
-            <Route path="/login" element={<LoginSignup />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+        <Routes>
+          <Route path="/" element={<LoginSignup />} />
+          {/* <Routes path="*" element={<NotFound />} /> */}
+        </Routes>
       )}
     </div>
   )

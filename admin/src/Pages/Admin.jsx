@@ -4,6 +4,12 @@ import Sidebar from "../Components/Sidebar/Sidebar";
 import AddProduct from "../Components/AddProduct/AddProduct";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import ListProduct from "../Components/ListProduct/ListProduct";
+import ListCategory from "../Components/ListCategory/ListCategory";
+import AddCategory from "../Components/AddCategory/AddCategory";
+import NotFound from "../Components/error/notFound";
+import ListOrder from "../Components/ListOrder/ListOrder";
+import ListUser from "../Components/ListUser/ListUser";
+import AddUser from "../Components/ListUser/AddUser";
 
 
 const Admin = () => {
@@ -15,8 +21,15 @@ const Admin = () => {
       <Routes>
         <Route path="/addproduct" element={<AddProduct />} />
         <Route path="/listproduct" element={<ListProduct />} />
+        <Route path="/listcategory" element={<ListCategory />} />
+        <Route path="/addcategory" element={<AddCategory />} />
+        <Route path="/listorders" element={<ListOrder />} />
+        <Route path="/users" element={<ListUser />} />
+        <Route path="/add" element={<AddUser />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
+
   );
 };
 

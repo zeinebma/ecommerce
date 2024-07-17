@@ -1,9 +1,8 @@
 const express = require("express");
 const app = express();
-const multer = require("multer");
 const path = require("path");
 const cors = require("cors");
-const sequelize = require('./src/config/db')
+const sequelize = require('./src/config/db');
 
 app.use(express.json());
 app.use(cors({
@@ -12,36 +11,25 @@ app.use(cors({
 
 sequelize.sync();
 
+app.use('/images', express.static(path.join(__dirname, 'upload/images')));
 
-const storage = multer.diskStorage({
-  destination: './upload/images',
-  filename: (req, file, cb) => {
-    return cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
-  }
-});
-const upload = multer({ storage: storage });
-app.post("/upload", upload.single('product'), (req, res) => {
-  res.json({
-    success: 1,
-    image_url: `/images/${req.file.filename}`
-  });
-});
+const userRoute = require('./src/routes/userRoute.js');
+const productRoute = require('./src/routes/productRoute.js');
+const cartRoute = require('./src/routes/cartRoute.js');
+const categoryRoute = require('./src/routes/categoryRoute.js');
+const orderRoutes = require('./src/routes/orderRoute.js');
+const stripeRoute = require('./src/routes/Stripe.js');
 
-
-app.use('/images', express.static('upload/images'));
-
-const userRoute = ('./src/routes/userRoute.js');
-const productRoute = ('./src/routes/productRoute.js');
-const cartRoute = ('./src/routes/cartRoute.js');
-
-app.use('/api/auth/', require(userRoute));
-app.use('/api/product/', require(productRoute));
-app.use('/api/cart/', require(cartRoute));
+app.use('/api/auth/', userRoute);
+app.use('/api/product/', productRoute);
+app.use('/api/cart/', cartRoute);
+app.use('/api/category/', categoryRoute);
+app.use('/api/order/', orderRoutes);
+app.use('/api/stripe/', stripeRoute);
 
 app.get("/", (req, res) => {
   res.send("Root");
 });
-
 
 const port = process.env.PORT || 4000;
 app.listen(port, (error) => {

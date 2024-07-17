@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./CSS/LoginSignup.css";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from 'axios';
 
 const LoginSignup = () => {
   const [state, setState] = useState("Login");
   const [formData, setFormData] = useState({ username: "", email: "", password: "" });
   const navigate = useNavigate();
+  const location = useLocation();
 
   const changeHandler = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,8 +29,9 @@ const LoginSignup = () => {
   const handleRedirect = async () => {
     try {
       const user = await fetchUserDetails();
+      const redirectTo = new URLSearchParams(location.search).get('redirect') || '/';
       if (user.role === 'user') {
-        window.location.replace('/');
+        window.location.replace(redirectTo);
       } else if (user.role === 'admin') {
         window.location.replace('/login')
       }
@@ -42,10 +44,9 @@ const LoginSignup = () => {
     try {
       const response = await axios.post('http://localhost:4000/api/auth/login', formData);
       if (response.data.role === 'admin') {
-        // await handleRedirect(); // Directly handle redirect for admin
-        alert('please try with correct email/password');
+        alert('Please try with correct email/password');
       } else {
-        localStorage.setItem('auth-token', response.data.token); // Store token for regular user
+        localStorage.setItem('auth-token', response.data.token);
         await handleRedirect();
       }
     } catch (error) {
@@ -56,14 +57,27 @@ const LoginSignup = () => {
   const signup = async () => {
     try {
       const response = await axios.post('http://localhost:4000/api/auth/signup', formData);
-      localStorage.setItem('auth-token', response.data.token);
-      localStorage.setItem('role', response.data.role);
       navigate('/login');
       console.log('Signup successful:', response.data);
     } catch (error) {
       alert("Signup failed: " + error.response.data.errors);
     }
   };
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('auth-token');
+      if (token) {
+        try {
+          await fetchUserDetails();
+          navigate('/');
+        } catch (error) {
+          console.error('User is not authenticated');
+        }
+      }
+    };
+    checkAuth();
+  }, [navigate]);
 
   return (
     <div className="loginsignup">

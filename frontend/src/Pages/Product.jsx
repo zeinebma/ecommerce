@@ -20,7 +20,7 @@ const Product = () => {
       <Breadcrums product={product}/>
       <ProductDisplay product={product}/>
       <DescriptionBox/>
-      <RelatedProducts id={product.id} category={product.category}/>
+      <RelatedProducts id={product.id} category={product.categoryId}/>
     </div>
   ) : null
 }
