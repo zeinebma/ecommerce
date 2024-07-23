@@ -29,7 +29,8 @@ const getCategory = async (req, res) => {
 
 const getCategorieById = async (req, res) => {
     try {
-        const newCategory = await Categorie.findById(req.params.id)
+        const { id } = req.params;
+        const newCategory = await Categorie.findByPk(id)
         if (Categorie)
             res.json(newCategory)
     } catch (error) {

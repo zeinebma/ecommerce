@@ -31,6 +31,19 @@ const Order = () => {
         }
     };
 
+    const getStatusStyle = (delivery_status) => {
+        switch (delivery_status) {
+            case 'Pending':
+                return { color: 'orange', fontWeight: 'bold' };
+            case 'Success':
+                return { color: 'green', fontWeight: 'bold' };
+            case 'Closed':
+                return { color: 'red', fontWeight: 'bold' };
+            default:
+                return {};
+        }
+    };
+
     return (
         <div className="orders">
             <h1>Your Orders</h1>
@@ -39,9 +52,10 @@ const Order = () => {
             ) : (
                 orders.map(order => (
                     <div key={order.id} className="order">
-                        <h2>Order #{order.id}</h2>
+                        <h2>Order number {order.id}</h2>
                         <p>Total Amount: ${order.total}</p>
-                        <p>Status: {order.delivery_status}</p>
+                        <p style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>delivery status: <p style={getStatusStyle(order.delivery_status)}>{order.delivery_status}</p> </p>
+                        <p>Payment status: {order.payment_status}</p>
                         <p>Date: {new Date(order.date).toLocaleDateString()}</p>
                         <div className="order-items">
                             {order.OrderItems.map(item => (
@@ -58,7 +72,7 @@ const Order = () => {
                     </div>
                 ))
             )}
-        </div>
+        </div >
     );
 };
 

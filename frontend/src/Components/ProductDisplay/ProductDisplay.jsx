@@ -41,9 +41,9 @@ const ProductDisplay = ({ product }) => {
           <div className="productdisplay-right-price-old">{currency}{product.old_price}</div>
           <div className="productdisplay-right-price-new">{currency}{product.new_price}</div>
         </div>
-        <div className="productdisplay-right-description">
+        {/* <div className="productdisplay-right-description">
           {product.description}
-        </div>
+        </div> */}
         <div className="productdisplay-right-size">
 
         </div>

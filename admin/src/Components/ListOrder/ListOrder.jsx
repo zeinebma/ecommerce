@@ -123,11 +123,11 @@ const ListOrder = () => {
   const getStatusStyle = (delivery_status) => {
     switch (delivery_status) {
       case 'Pending':
-        return { color: 'yellow' };
+        return { color: 'orange', fontWeight: 'bold' };
       case 'Success':
-        return { color: 'green' };
+        return { color: 'green', fontWeight: 'bold' };
       case 'Closed':
-        return { color: 'red' };
+        return { color: 'red', fontWeight: 'bold' };
       default:
         return {};
     }

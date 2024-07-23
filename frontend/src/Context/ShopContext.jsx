@@ -35,18 +35,18 @@ const ShopProvider = ({ children }) => {
     try {
       const response = await fetch(`${backend_url}/api/cart/${userId}`);
       const data = await response.json();
-      console.log(data);
+      // console.log(data);
       const items = data.reduce((acc, item) => {
         acc[item.productId] = {
           id: item.productId,
           quantity: item.quantity,
-          name: item.Product.name, // Add name if available in your cart item structure
-          new_price: item.Product.new_price // Add price if available in your cart item structure
+          name: item.Product.name,
+          new_price: item.Product.new_price,
+          image: item.Product.image
         };
         return acc;
       }
         , {});
-
       // Update state and local storage with fetched cart items
       setCartItems(items);
       localStorage.setItem('cart', JSON.stringify(items));
@@ -77,7 +77,10 @@ const ShopProvider = ({ children }) => {
   const addToCart = async (productId, quantity) => {
     try {
       const token = localStorage.getItem('auth-token');
-      if (!token) throw new Error("User not authenticated");
+      if (!token) {
+        alert("User not authenticated")
+        throw new Error("User not authenticated");
+      }
 
       // Fetch product details
       const productResponse = await fetch(`${backend_url}/api/product/getproduct/${productId}`);
@@ -98,8 +101,9 @@ const ShopProvider = ({ children }) => {
         [productId]: {
           id: productId,
           quantity: (prevItems[productId]?.quantity || 0) + quantity,
-          name: productData.name, // Add name if available in your cart item structure
-          new_price: productData.new_price // Add price if available in your cart item structure
+          name: productData.name,
+          new_price: productData.new_price,
+          image: productData.image
         }
       }));
     } catch (error) {
@@ -126,7 +130,6 @@ const ShopProvider = ({ children }) => {
     }
   };
 
-
   const getTotalCartAmount = () => {
     return products.reduce((total, product) => {
       const quantity = cartItems[product.id]?.quantity || 0;
@@ -137,6 +140,17 @@ const ShopProvider = ({ children }) => {
   const getTotalCartItems = () => {
     return Object.values(cartItems).reduce((sum, item) => sum + item.quantity, 0);
   };
+
+  const getCategoryById = async (id) => {
+    try {
+      const response = await fetch(`${backend_url}/api/category/${id}`);
+      const data = await response.json();
+      return data.name;
+    } catch (error) {
+      console.error('Failed to fetch category:', error);
+      return 'Unknown';
+    }
+  }
 
   return (
     <ShopContext.Provider
@@ -149,7 +163,8 @@ const ShopProvider = ({ children }) => {
         getTotalCartAmount,
         getTotalCartItems,
         fetchUserDetails,
-        fetchCartItems
+        fetchCartItems,
+        getCategoryById,
       }}
     >
       {children}

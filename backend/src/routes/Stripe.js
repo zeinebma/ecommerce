@@ -12,26 +12,38 @@ router.use(express.json());
 router.post('/create-checkout-session', async (req, res) => {
     try {
         const { cartItems, userId } = req.body;
+
+        // Log cartItems for debugging
+        console.log('Received cartItems:', cartItems);
+
         const customer = await stripe.customers.create({
             metadata: {
                 userId: userId,
                 cart: JSON.stringify(cartItems)
             }
-        }
-        )
+        });
 
         const line_items = cartItems.map((item) => {
+            // Ensure item properties are valid
+            if (!item.name || !item.new_price || !item.quantity || !item.image) {
+                throw new Error(`Missing properties for item ${JSON.stringify(item)}`);
+            }
+
+            // Log item image URL
+            console.log('Item image URL:', item.image);
+
             return {
                 price_data: {
                     currency: "eur",
                     product_data: {
                         name: item.name,
                         description: item.description,
+                        images: [item.image], // Include the image URL here
                         metadata: {
                             id: item.id,
                         },
                     },
-                    unit_amount: item.new_price * 100,
+                    unit_amount: Math.round(item.new_price * 100), // Convert euros to cents
                 },
                 quantity: item.quantity,
             };
@@ -95,8 +107,8 @@ router.post('/create-checkout-session', async (req, res) => {
 
         res.send({ url: session.url });
     } catch (error) {
-        console.error('Error creating checkout session:', error);
-        res.status(500).send({ error: 'Internal Server Error' });
+        console.error('Error creating checkout session:', error.message);
+        res.status(500).send({ error: error.message });
     }
 });
 
@@ -120,8 +132,6 @@ const createOrder = async (customer, data, userId) => {
             total: data.amount_total / 100,
             shipping: data.customer_details, // JSON object for shipping
             payment_status: data.payment_status,
-            //             delivery_status: data.delivery_status,
-            // date: data.date,
         });
 
         const savedOrder = await newOrder.save();
@@ -141,15 +151,15 @@ const createOrder = async (customer, data, userId) => {
             }
         }
         await Cart.destroy({ where: { userId } });
-        res.status(201).json(savedOrder);
+        return savedOrder;
 
     } catch (err) {
         console.log(err);
+        throw err;
     }
 };
 
-
-// Stripe webhoook
+// Stripe webhook
 
 router.post(
     "/webhook",
@@ -195,8 +205,7 @@ router.post(
                     try {
                         // CREATE ORDER
                         const userId = customer.metadata.userId;
-                        const total = data.amount_total;
-                        createOrder(customer, data, userId, total);
+                        await createOrder(customer, data, userId);
                     } catch (err) {
                         console.log(typeof createOrder);
                         console.log(err);

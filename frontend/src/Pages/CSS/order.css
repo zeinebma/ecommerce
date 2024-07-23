@@ -1,54 +1,72 @@
-/* src/Components/Order/Order.css */
+/* src/Components/Order/CSS/order.css */
 .orders {
     padding: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .orders h1 {
-    font-size: 24px;
+    text-align: center;
     margin-bottom: 20px;
+    color: #333;
+    font-size: 2em;
 }
 
 .order {
-    border: 1px solid #ccc;
+    background: #fff;
     padding: 20px;
     margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .order h2 {
-    font-size: 20px;
+    margin-top: 0;
+    color: #555;
+    font-size: 1.5em;
 }
 
 .order p {
     margin: 5px 0;
+    color: #666;
+    font-size: 1em;
 }
 
 .order-items {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 10px;
 }
 
 .order-item {
+    background: #f3f3f3;
+    padding: 10px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .order-item img {
-    width: 100px;
-    height: 100px;
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
     object-fit: cover;
-    margin-right: 20px;
-}
-
-.order-item-info {
-    flex: 1;
+    margin-right: 15px;
 }
 
 .order-item-info h3 {
     margin: 0;
-    font-size: 18px;
+    font-size: 1.1em;
+    color: #333;
 }
 
 .order-item-info p {
-    margin: 5px 0;
+    margin: 2px 0;
+    color: #777;
+    font-size: 0.9em;
 }

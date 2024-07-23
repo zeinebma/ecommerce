@@ -7,20 +7,28 @@ import { useParams } from 'react-router-dom'
 import { ShopContext } from '../Context/ShopContext'
 
 const Product = () => {
-  const {products} = useContext(ShopContext);
-  const {productId} = useParams();
-  const [product,setProduct] = useState(false);
+  const { products, getCategoryById } = useContext(ShopContext);
+  const { productId } = useParams();
+  const [product, setProduct] = useState(false);
+  const [categoryName, setCategoryName] = useState('');
 
-  useEffect(()=>{
-    setProduct(products.find((e)=>e.id === Number(productId)))
-  },[products,productId])
+  useEffect(() => {
+    const prod = products.find((e) => e.id === Number(productId));
+    setProduct(prod);
+    if (prod) {
+      (async () => {
+        const categoryName = await getCategoryById(prod.categoryId);
+        setCategoryName(categoryName);
+      })();
+    }
+  }, [products, productId, getCategoryById]);
 
   return product ? (
     <div>
-      <Breadcrums product={product}/>
-      <ProductDisplay product={product}/>
-      <DescriptionBox/>
-      <RelatedProducts id={product.id} category={product.categoryId}/>
+      <Breadcrums product={product} cat={categoryName} />
+      <ProductDisplay product={product} />
+      <DescriptionBox product={product} />
+      <RelatedProducts id={product.id} category={product.categoryId} />
     </div>
   ) : null
 }

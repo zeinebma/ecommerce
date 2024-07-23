@@ -5,7 +5,7 @@ const Product = require('../models/product')
 exports.allProducts = async (req, res) => {
     try {
         const products = await Product.findAll({
-            include: Category // Include the Category model
+            include: Category
         });
         res.json(products);
     } catch (error) {
@@ -37,7 +37,7 @@ exports.popularProduct = async (req, res) => {
     const category = await Category.findOne({ where: { name: 'vetements' } });
     let products = await Product.findAll({ where: { categoryId: category.id } });
     let arr = products.splice(0, 4);
-    console.log("Popular In equipements");
+    // console.log("Popular In equipements");
     res.send(arr);
 };
 
@@ -50,7 +50,6 @@ exports.relatedProducts = async (req, res) => {
     res.send(arr);
 };
 
-// Route to get products by category name
 exports.productByCat = async (req, res) => {
     const { categoryName } = req.params;
     try {
@@ -102,13 +101,11 @@ exports.updateProduct = async (req, res) => {
                 return res.status(404).json({ success: false, message: "Category not found" });
             }
 
-            // Check if req.file exists and then update image accordingly
-            let imageUrl = product.image; // Default to existing image
+            let imageUrl = product.image;
             if (req.file) {
                 imageUrl = `http://localhost:4000/images/${req.file.filename}`;
             }
 
-            // Update product properties
             product.name = name;
             product.old_price = old_price;
             product.new_price = new_price;
@@ -126,7 +123,6 @@ exports.updateProduct = async (req, res) => {
         res.status(500).json({ success: false, message: "An error occurred while updating the product" });
     }
 };
-
 
 
 exports.removeproduct = async (req, res) => {

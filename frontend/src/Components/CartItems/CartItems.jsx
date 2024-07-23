@@ -21,6 +21,12 @@ const CartItems = () => {
     id: productId,
   }));
 
+  useEffect(() => {
+    if (user) {
+      fetchCartItems(user.id);
+    }
+  }, [user]);
+
   if (!user) {
     return (
       <div className="cartitems">
@@ -28,6 +34,7 @@ const CartItems = () => {
       </div>
     );
   }
+
 
   return (
     <div className="cartitems">
@@ -67,11 +74,11 @@ const CartItems = () => {
               <p>Subtotal</p>
               <p>{currency}{getTotalCartAmount()}</p>
             </div>
-            <hr />
+            {/* <hr />
             <div className="cartitems-total-item">
               <p>Shipping Fee</p>
               <p>Free</p>
-            </div>
+            </div> */}
             <hr />
             <div className="cartitems-total-item">
               <h3>Total</h3>

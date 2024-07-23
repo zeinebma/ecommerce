@@ -6,6 +6,7 @@ const AuthRoute = ({ children }) => {
     const token = localStorage.getItem('auth-token');
 
     if (!token) {
+        alert("you need to login first ")
         return <Navigate to={`/login?redirect=${location.pathname}`} />;
     }
 
