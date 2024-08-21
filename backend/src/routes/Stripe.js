@@ -5,6 +5,8 @@ const Cart = require('../models/cart');
 const stripe = Stripe(process.env.STRIPE_KEY);
 require('dotenv').config();
 const router = express.Router();
+const sendOrderConfirmationEmail = require("../utils/email");
+const { updateOrderStatus } = require('../controllers/orderController');
 
 // Middleware to parse JSON bodies
 router.use(express.json());
@@ -151,6 +153,10 @@ const createOrder = async (customer, data, userId) => {
             }
         }
         await Cart.destroy({ where: { userId } });
+
+        // Send order confirmation email
+        sendOrderConfirmationEmail(data.customer_details.name, data.customer_details.email, data.customer_details.address, Items);
+
         return savedOrder;
 
     } catch (err) {
@@ -158,6 +164,7 @@ const createOrder = async (customer, data, userId) => {
         throw err;
     }
 };
+
 
 // Stripe webhook
 
@@ -212,6 +219,18 @@ router.post(
                     }
                 })
                 .catch((err) => console.log(err.message));
+        }
+
+        if (eventType === "payment_intent.canceled") {
+            const paymentIntent = data;
+
+            try {
+                const orderId = paymentIntent.metadata.orderId;
+                await updateOrderStatus(orderId, 'canceled');
+                console.log(`Order ${orderId} has been canceled`);
+            } catch (err) {
+                console.log("Error updating order status: ", err);
+            }
         }
 
         res.status(200).end();

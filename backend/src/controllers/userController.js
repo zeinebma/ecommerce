@@ -121,3 +121,22 @@ exports.deleteUser = async (req, res) => {
         });
     }
 }
+
+exports.update = async (req, res) => {
+    const { id, name, email, password } = req.body;
+    try {
+        const result = await User.findByPk(id);
+        if (result) {
+            result.name = name;
+            result.email = email;
+            result.password = password;
+            await result.save();
+            res.json({ success: true, message: "User updated successfully", result });
+        } else {
+            res.status(404).json({ success: false, message: "user not found" });
+        }
+    } catch (error) {
+        console.error("Error updating user:", error);
+        res.status(500).json({ success: false, message: "An error occurred while updating" })
+    }
+}

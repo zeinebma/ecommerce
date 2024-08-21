@@ -81,6 +81,25 @@ exports.editOrder = async (req, res) => {
     }
 }
 
+exports.updateOrderStatus = async (req, res) => {
+    const { id, payment_status } = req.body;
+    try {
+        const result = await Order.findByPk(id);
+        if (result) {
+            result.payment_status = payment_status;
+            await result.save();
+            res.json({
+                success: true, message: "order updated successfully", result
+            });
+        } else {
+            res.status(404).json({ success: false, message: "order not found" });
+        }
+    } catch (error) {
+        console.error("Error updating order:", error);
+        res.status(500).json({ success: false, message: "An error occurred while updating the order" });
+    }
+}
+
 exports.getOrderById = async (req, res) => {
     const { id } = req.params;
     try {

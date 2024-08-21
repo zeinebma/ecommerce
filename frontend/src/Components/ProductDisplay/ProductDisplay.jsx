@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import "./ProductDisplay.css";
 import star_icon from "../Assets/star_icon.png";
 import star_dull_icon from "../Assets/star_dull_icon.png";
@@ -6,12 +6,21 @@ import { ShopContext } from "../../Context/ShopContext";
 import { backend_url, currency } from "../../App";
 
 const ProductDisplay = ({ product }) => {
-
   const { addToCart } = useContext(ShopContext);
+  const [quantity, setQuantity] = useState(1);
 
   const handleAddToCart = () => {
-    addToCart(product.id, 1);
-    console.log(product.image);
+    addToCart(product.id, quantity);
+  };
+
+  const handleIncrement = () => {
+    setQuantity(prevQuantity => prevQuantity + 1);
+  };
+
+  const handleDecrement = () => {
+    if (quantity > 1) {
+      setQuantity(prevQuantity => prevQuantity - 1);
+    }
   };
 
   return (
@@ -45,10 +54,13 @@ const ProductDisplay = ({ product }) => {
           {product.description}
         </div> */}
         <div className="productdisplay-right-size">
-
+          <div className="quantity-control">
+            <button className="btn-quantity" onClick={handleDecrement} disabled={quantity <= 1}>-</button>
+            <span>{quantity}</span>
+            <button className="btn-quantity" onClick={handleIncrement}>+</button>
+          </div>
         </div>
         <button onClick={handleAddToCart}>ADD TO CART</button>
-
       </div>
     </div>
   );

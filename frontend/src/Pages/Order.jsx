@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { backend_url } from '../App';
 import './CSS/order.css';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const Order = () => {
     const [orders, setOrders] = useState([]);
@@ -11,7 +12,11 @@ const Order = () => {
         const user = await fetchUserDetails();
         fetch(`${backend_url}/api/order/user/${user.id}`)
             .then(res => res.json())
-            .then(data => setOrders(data));
+            .then(data => {
+                const sortedOrders = data.sort((a, b) => new Date(b.date) - new Date(a.date));
+                setOrders(sortedOrders);
+            });
+
     };
 
     useEffect(() => {
@@ -59,14 +64,16 @@ const Order = () => {
                         <p>Date: {new Date(order.date).toLocaleDateString()}</p>
                         <div className="order-items">
                             {order.OrderItems.map(item => (
-                                <div key={item.id} className="order-item">
-                                    <img src={`${item.Product.image}`} alt={item.Product.name} />
-                                    <div className="order-item-info">
-                                        <h3>{item.Product.name}</h3>
-                                        <p>Price: ${item.price}</p>
-                                        <p>Quantity: {item.quantity}</p>
+                                <Link to={`/product/${item.Product.id}`} >
+                                    <div key={item.id} className="order-item">
+                                        <img src={`${item.Product.image}`} alt={item.Product.name} />
+                                        <div className="order-item-info">
+                                            <h3>{item.Product.name}</h3>
+                                            <p>Price: ${item.price}</p>
+                                            <p>Quantity: {item.quantity}</p>
+                                        </div>
                                     </div>
-                                </div>
+                                </Link>
                             ))}
                         </div>
                     </div>

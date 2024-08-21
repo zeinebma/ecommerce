@@ -60,7 +60,6 @@ function App() {
       ) : (
         <Routes>
           <Route path="/" element={<LoginSignup />} />
-          {/* <Routes path="*" element={<NotFound />} /> */}
         </Routes>
       )}
     </div>

@@ -96,16 +96,22 @@ const ShopProvider = ({ children }) => {
       });
 
       // Update state with the new cart item
-      setCartItems((prevItems) => ({
-        ...prevItems,
-        [productId]: {
-          id: productId,
-          quantity: (prevItems[productId]?.quantity || 0) + quantity,
-          name: productData.name,
-          new_price: productData.new_price,
-          image: productData.image
-        }
-      }));
+      setCartItems((prevItems) => {
+        const newQuantity = (prevItems[productId]?.quantity || 0) + quantity;
+        const updatedItems = {
+          ...prevItems,
+          [productId]: {
+            id: productId,
+            quantity: newQuantity,
+            name: productData.name,
+            new_price: productData.new_price,
+            image: productData.image
+          }
+        };
+        // Save updated items to local storage
+        localStorage.setItem('cart', JSON.stringify(updatedItems));
+        return updatedItems;
+      });
     } catch (error) {
       console.error('Failed to add product to cart:', error);
     }
@@ -123,6 +129,7 @@ const ShopProvider = ({ children }) => {
       setCartItems((prevItems) => {
         const updatedItems = { ...prevItems };
         delete updatedItems[productId];
+        localStorage.setItem('cart', JSON.stringify(updatedItems));
         return updatedItems;
       });
     } catch (error) {

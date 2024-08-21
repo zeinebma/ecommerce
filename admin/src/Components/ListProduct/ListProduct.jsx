@@ -62,14 +62,28 @@ const ListProduct = () => {
   }
 
   const removeProduct = async (id) => {
-    await fetch(`${backend_url}/api/product/removeproduct/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    fetchInfo();
-  }
+    try {
+      const response = await fetch(`${backend_url}/api/product/removeproduct/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await response.json();
+
+      if (response.status === 400) {
+        alert(`Cannot delete this product. It is associated with the following orders: ${result.associatedOrders.join(', ')}`);
+        return;
+      }
+
+      if (result.status === 'success') {
+        fetchInfo(); // Rafraîchir la liste des produits
+      }
+    } catch (error) {
+      console.error('Error removing product:', error);
+    }
+  };
 
   const removeSelectedProducts = async () => {
     for (const id of selectedProducts) {

@@ -4,6 +4,10 @@
     align-items: center;
     box-shadow: 0 1px 3px -2px black;
     padding: 15px 70px;
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 1000; 
 }
 
 .nav-logo {
@@ -145,7 +149,7 @@
     top: 50px;
     right: 0;
     width: 160px;
-    height: 195px;
+    height: 210px;
     background: white;
     border: 1px solid #ccc;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);

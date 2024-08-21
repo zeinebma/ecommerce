@@ -26,6 +26,7 @@ const Admin = () => {
         <Route path="/listorders" element={<ListOrder />} />
         <Route path="/users" element={<ListUser />} />
         <Route path="/add" element={<AddUser />} />
+        <Route path="/" element={<AddUser />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>

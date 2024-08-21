@@ -1,4 +1,5 @@
 const Category = require('../models/category');
+const { OrderItem, Order } = require('../models/order');
 const Product = require('../models/product')
 
 
@@ -46,7 +47,7 @@ exports.relatedProducts = async (req, res) => {
     console.log("Related Products");
     const { categoryId } = req.body;
     const products = await Product.findAll({ where: { categoryId } });
-    const arr = products.slice(0, 4);
+    const arr = products.slice(0, 5);
     res.send(arr);
 };
 
@@ -72,7 +73,7 @@ exports.addproduct = async (req, res) => {
         if (!category) {
             return res.status(404).json({ error: 'Category not found' });
         }
-        const imageUrl = `http://localhost:4000/images/${req.file.filename}`;
+        const imageUrl = req.file ? req.file.path : '';
 
         const product = await Product.create({
             name,
@@ -103,9 +104,8 @@ exports.updateProduct = async (req, res) => {
 
             let imageUrl = product.image;
             if (req.file) {
-                imageUrl = `http://localhost:4000/images/${req.file.filename}`;
+                imageUrl = req.file ? req.file.path : '';
             }
-
             product.name = name;
             product.old_price = old_price;
             product.new_price = new_price;
@@ -113,7 +113,6 @@ exports.updateProduct = async (req, res) => {
             product.image = imageUrl;
 
             await product.save();
-
             res.json({ success: true, message: "Product updated successfully", product });
         } else {
             res.status(404).json({ success: false, message: "Product not found" });
@@ -126,17 +125,36 @@ exports.updateProduct = async (req, res) => {
 
 
 exports.removeproduct = async (req, res) => {
-    const id = req.params.id;
+    const productId = req.params.id;
     try {
-        const result = await Product.destroy({ where: { id: id } });
-        if (result) {
-            console.log("Removed");
-            res.json({ success: true, message: "Product removed successfully" });
-        } else {
-            res.status(404).json({ success: false, message: "Product not found" });
+        const associatedOrderItems = await OrderItem.findAll({
+            where: { productId },
+            include: [{ model: Order }]
+        });
+
+        if (associatedOrderItems.length > 0) {
+            const associatedOrders = associatedOrderItems.map(item => item.Order.id);
+
+            return res.status(400).json({
+                status: 'error',
+                message: `Cannot delete this product as it is associated with the following orders: ${associatedOrders.join(', ')}`,
+                associatedOrders
+            });
         }
+
+        await Product.destroy({
+            where: { id: productId }
+        });
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Product deleted successfully'
+        });
     } catch (error) {
-        console.error("Error removing product:", error);
-        res.status(500).json({ success: false, message: "An error occurred while removing the product" });
+        console.error('Error deleting product:', error);
+        res.status(500).json({
+            status: 'error',
+            message: 'An error occurred while trying to delete the product.',
+        });
     }
 };

@@ -10,6 +10,7 @@ import NotFound from "./Components/error/notFound";
 import Order from "./Pages/Order";
 import CheckoutSuccess from "./Components/success/checkoutSuccess";
 import AuthRoute from "./Components/AuthRoute";
+import Profile from "./Components/Profile/Profile";
 
 export const backend_url = 'http://localhost:4000';
 export const currency = '€';
@@ -25,6 +26,7 @@ function App() {
           <Route path='/product/:productId' element={<Product />} />
           <Route path="/cart/:id" element={<AuthRoute><Cart /></AuthRoute>} />
           <Route path="/checkout_success" element={<CheckoutSuccess />} />
+          <Route path="/profile" element={<Profile />} />
           <Route
             path="/orders"
             element={
