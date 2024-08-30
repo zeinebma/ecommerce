@@ -1,8 +1,6 @@
-import { BrowserRouter, Route, Routes, useNavigate } from "react-router-dom";
-import Footer from "./Components/Footer/Footer";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import Navbar from "./Components/Navbar/Navbar";
 import Admin from "./Pages/Admin";
-import NotFound from "./Components/error/notFound";
 import LoginSignup from "./Pages/LoginSignup";
 import axios from 'axios';
 import { useEffect, useState } from "react";

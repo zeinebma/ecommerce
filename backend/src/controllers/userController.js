@@ -1,5 +1,6 @@
 const User = require('../models/user')
 const jwt = require("jsonwebtoken");
+const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 
@@ -8,7 +9,7 @@ exports.login = async (req, res) => {
     let success = false;
     let user = await User.findOne({ where: { email: req.body.email } });
     if (user) {
-        const passCompare = req.body.password === user.password;
+        const passCompare = await bcrypt.compare(req.body.password, user.password);
         if (passCompare) {
             const data = { user: { id: user.id } };
             success = true;
@@ -16,7 +17,7 @@ exports.login = async (req, res) => {
             const token = jwt.sign(data, process.env.SECRET_KEY);
             res.json({ success, token, role: user.role });
         } else {
-            return res.status(400).json({ success: success, errors: "please try with correct email/password" });
+            return res.status(400).json({ success: success, errors: "Email or password is incorrect" });
         }
     } else {
         return res.status(400).json({ success: success, errors: "please try with correct email/password" });
@@ -25,18 +26,27 @@ exports.login = async (req, res) => {
 
 
 exports.signup = async (req, res) => {
-    console.log("Sign Up");
-    let success = false;
-    let check = await User.findOne({ where: { email: req.body.email } });
-    if (check) {
-        return res.status(400).json({ success: success, errors: "existing user found with this email" });
+    const { username, email, password } = req.body;
+    if (!username || !email || !password) {
+        return res.status(400).json({ success: false, errors: "All fields (name, email, password) are required." });
     }
+
+    let success = false;
+    let check = await User.findOne({ where: { email } });
+    if (check) {
+        return res.status(400).json({ success, errors: "existing user found with this email" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     const user = new User({
-        name: req.body.username,
-        email: req.body.email,
-        password: req.body.password,
-        role: req.body.role,
+        name: username,
+        email,
+        password: hashedPassword,
+        role: 'user',
     });
+
     await user.save();
     const data = { user: { id: user.id } };
     const token = jwt.sign(data, process.env.SECRET_KEY);
@@ -45,16 +55,22 @@ exports.signup = async (req, res) => {
 };
 
 exports.addAdmin = async (req, res) => {
-    console.log("Sign Up");
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+        return res.status(400).json({ success: false, errors: "All fields (name, email, password) are required." });
+    }
+
     let success = false;
     let check = await User.findOne({ where: { email: req.body.email } });
     if (check) {
         return res.status(400).json({ success: success, errors: "existing user found with this email" });
     }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
     const user = new User({
         name: req.body.username,
         email: req.body.email,
-        password: req.body.password,
+        password: hashedPassword,
         role: 'admin',
     });
     await user.save();

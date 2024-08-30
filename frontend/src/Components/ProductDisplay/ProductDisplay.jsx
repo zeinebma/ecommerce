@@ -6,7 +6,7 @@ import { ShopContext } from "../../Context/ShopContext";
 import { backend_url, currency } from "../../App";
 
 const ProductDisplay = ({ product }) => {
-  const { addToCart } = useContext(ShopContext);
+  const { addToCart, message } = useContext(ShopContext);
   const [quantity, setQuantity] = useState(1);
 
   const handleAddToCart = () => {
@@ -26,6 +26,7 @@ const ProductDisplay = ({ product }) => {
   return (
     <div className="productdisplay">
       <div className="productdisplay-left">
+
         <div className="productdisplay-img-list">
           <img src={product.image} alt="img" />
           <img src={product.image} alt="img" />

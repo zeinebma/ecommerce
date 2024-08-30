@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { backend_url, currency } from "../../App";
+import { Table, TableBody, TableCell, TableContainer, TextField, TableHead, TableRow, Paper, IconButton, Button, TablePagination, Box } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import EditOrder from "../EditOrder/EditOrder";
 import OrderDetails from "../OrderDetails/OrderDetails";
-import './ListOrder.css'
 
 const ListOrder = () => {
   const [allOrders, setAllOrders] = useState([]);
@@ -13,35 +15,28 @@ const ListOrder = () => {
   const [modalOpenEdit, setModalOpenEdit] = useState(false);
   const [modalOpenShow, setModalOpenShow] = useState(false);
   const [orderDetails, setOrderDetails] = useState(null);
-
-  const fetchOrders = () => {
-    fetch(`${backend_url}/api/order/listorder`)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! Status: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((data) => {
-        console.log('Fetched orders:', data); // Debug log
-        setAllOrders(Array.isArray(data) ? data : []);
-      })
-      .catch((error) => {
-        console.error('Error fetching orders:', error);
-      });
-  };
-
-  const fetchUsers = () => {
-    fetch(`${backend_url}/api/auth/users`)
-      .then((res) => res.json())
-      .then((data) => setUsers(Array.isArray(data) ? data : []))
-      .catch((error) => console.error('Error fetching users:', error));
-  };
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchOrders();
     fetchUsers();
   }, []);
+
+  const fetchOrders = () => {
+    fetch(`${backend_url}/api/order/listorder`)
+      .then(res => res.json())
+      .then(data => setAllOrders(Array.isArray(data) ? data : []))
+      .catch(error => console.error('Error fetching orders:', error));
+  };
+
+  const fetchUsers = () => {
+    fetch(`${backend_url}/api/auth/users`)
+      .then(res => res.json())
+      .then(data => setUsers(Array.isArray(data) ? data : []))
+      .catch(error => console.error('Error fetching users:', error));
+  };
 
   const fetchOrderById = async (orderId) => {
     try {
@@ -111,7 +106,7 @@ const ListOrder = () => {
   };
 
   const getUserName = (userId) => {
-    const user = Array.isArray(users) ? users.find((e) => e.id === userId) : null;
+    const user = users.find((e) => e.id === userId);
     return user ? user.name : 'Unknown';
   };
 
@@ -133,44 +128,94 @@ const ListOrder = () => {
     }
   };
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const filteredOrder = allOrders.filter(order =>
+    getUserName(order.userId).toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="listproduct">
       <h1>All Orders List</h1>
-      <div className="listproduct-format-main">
-        <p>ID</p> <p>Name</p> <p>Total amount</p> <p>Status</p> <p>Date</p> <p>Actions</p>
-      </div>
-      <div className="listproduct-allproducts">
-        <hr />
-        {Array.isArray(allOrders) &&
-          allOrders.map((e, index) => (
-            <div key={index}>
-              <div className="listproduct-format-main listproduct-format">
-                <p>{e.id}</p>
-                <p className="cartitems-product-title">{getUserName(e.userId)}</p>
-                <p>{e.total} {currency}</p>
-                <p style={getStatusStyle(e.delivery_status)}>{e.delivery_status}</p>
-                <p>{formatDate(e.date)}</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                  <img
-                    src="https://cdn-icons-png.flaticon.com/128/1828/1828911.png"
-                    width={30}
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => handleEditClick(e)}
-                  />
-                  <img
-                    className="listproduct-remove-icon"
-                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSckjmVT1OZgpy0bFGkIAitjAu8Ed6_e2CLCA&s"
-                    width={30}
-                    alt=""
-                    onClick={() => removeOrder(e.id)}
-                  />
-                  <button onClick={() => handleViewDetailsClick(e.id)}>View Details</button>
-                </div>
-              </div>
-              <hr />
-            </div>
-          ))}
-      </div>
+      <TextField
+        label="Search Products"
+        variant="outlined"
+        value={searchTerm}
+        onChange={handleSearchChange}
+        style={{ margin: '20px 0' }}
+        fullWidth
+      />
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>ID</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Total Amount</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Date</TableCell>
+              <TableCell align="center">Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredOrder.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((order, index) => (
+              <TableRow key={index}>
+                <TableCell>{order.id}</TableCell>
+                <TableCell>{getUserName(order.userId)}</TableCell>
+                <TableCell>{order.total} {currency}</TableCell>
+                <TableCell style={getStatusStyle(order.delivery_status)}>{order.delivery_status}</TableCell>
+                <TableCell>{formatDate(order.date)}</TableCell>
+                <TableCell align="center">
+                  <IconButton onClick={() => handleEditClick(order)}>
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton onClick={() => removeOrder(order.id)}>
+                    <DeleteIcon />
+                  </IconButton>
+                  <Button variant="outlined" onClick={() => handleViewDetailsClick(order.id)}>
+                    View Details
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Box display="flex" justifyContent="center" width={500} mt={2}>
+        <TablePagination
+          component="div"
+          count={allOrders.length}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          style={{ width: '100%' }}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          rowsPerPageOptions={[5, 10, 25]}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            '& .MuiTablePagination-actions': {
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }
+          }}
+        />
+      </Box>
+
       {editingOrder && (
         <EditOrder
           open={modalOpenEdit}
@@ -181,6 +226,7 @@ const ListOrder = () => {
           users={users}
         />
       )}
+
       {orderDetails && (
         <OrderDetails
           open={modalOpenShow}

@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import "./ListProduct.css";
-import cross_icon from '../Assets/cross_icon.png';
 import { backend_url, currency } from "../../App";
 import EditProduct from '../EditProduct/EditProduct';
-import add_product_icon from '../Assets/Product_Cart.svg';
 import { Link } from 'react-router-dom';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, TablePagination, TextField, IconButton, Box } from '@mui/material';
 
 const ListProduct = () => {
   const [image, setImage] = useState(null);
@@ -20,6 +19,9 @@ const ListProduct = () => {
   });
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchInfo = () => {
     fetch(`${backend_url}/api/product/allproducts`)
@@ -142,6 +144,22 @@ const ListProduct = () => {
     }
   };
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const filteredProducts = allproducts.filter(product =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   return (
     <div className="listproduct">
       <h1>All Products List</h1>
@@ -150,41 +168,86 @@ const ListProduct = () => {
           <p>+ Add Product</p>
         </Link>
       </div>
+      <TextField
+        label="Search Products"
+        variant="outlined"
+        value={searchTerm}
+        onChange={handleSearchChange}
+        style={{ margin: '20px 0' }}
+        fullWidth
+      />
       {selectedProducts.length > 0 &&
         <button onClick={removeSelectedProducts} className="button-17">Remove Selected</button>
       }
-      <div className="listproduct-format-main">
-        <input type="checkbox"
-          onChange={handleSelectAll}
-          style={{ height: '20px', cursor: "pointer", }}
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>
+                <input type="checkbox"
+                  onChange={handleSelectAll}
+                  style={{ height: '20px', cursor: "pointer", }}
+                />
+              </TableCell>
+              <TableCell>ID</TableCell>
+              <TableCell>Products</TableCell>
+              <TableCell>Title</TableCell>
+              <TableCell>Old Price</TableCell>
+              <TableCell>New</TableCell>
+              <TableCell>Category</TableCell>
+              <TableCell align="right">Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredProducts.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((product, index) => (
+              <TableRow key={index}>
+                <TableCell>
+                  <input
+                    type="checkbox"
+                    checked={selectedProducts.includes(product.id)}
+                    onChange={(e) => handleCheckboxChange(e, product.id)}
+                    style={{ height: '15px' }}
+                  />
+                </TableCell>
+                <TableCell>{product.id}</TableCell>
+                <TableCell>
+                  <img className="listproduct-product-icon" width={170} src={product.image} alt="" />
+                </TableCell>
+                <TableCell>{product.name}</TableCell>
+                <TableCell>{product.old_price}</TableCell>
+                <TableCell>{product.new_price}</TableCell>
+                <TableCell>{getCategoryName(product.categoryId)}</TableCell>
+                <TableCell align="right" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                  <img src="https://cdn-icons-png.flaticon.com/128/1828/1828911.png" width={30} style={{ cursor: 'pointer' }} onClick={() => handleEditClick(product)} />
+                  <img className="listproduct-remove-icon" onClick={() => removeProduct(product.id)} src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSckjmVT1OZgpy0bFGkIAitjAu8Ed6_e2CLCA&s" width={30} alt="" />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <Box display="flex" justifyContent="center" width={500} mt={2}>
+        <TablePagination
+          component="div"
+          count={allproducts.length}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          style={{ width: '100%' }}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          rowsPerPageOptions={[5, 10, 25]}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            '& .MuiTablePagination-actions': {
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }
+          }}
         />
-        <p>Products</p> <p>Title</p> <p>Old Price</p> <p>New</p> <p>Category</p> <p>Actions</p>
-      </div>
-      <div className="listproduct-allproducts">
-        <hr />
-        {allproducts.map((product, index) => (
-          <div key={index}>
-            <div className="listproduct-format-main listproduct-format">
-              <input
-                type="checkbox"
-                checked={selectedProducts.includes(product.id)}
-                onChange={(e) => handleCheckboxChange(e, product.id)}
-                style={{ height: '15px' }}
-              />
-              <img className="listproduct-product-icon" width={170} src={product.image} alt="" />
-              <p className="cartitems-product-title">{product.name}</p>
-              <p>{currency}{product.old_price}</p>
-              <p>{currency}{product.new_price}</p>
-              <p>{getCategoryName(product.categoryId)}</p>
-              <div className="action-btn">
-                <img src="https://cdn-icons-png.flaticon.com/128/1828/1828911.png" width={30} style={{ cursor: 'pointer' }} onClick={() => handleEditClick(product)} />
-                <img className="listproduct-remove-icon" onClick={() => removeProduct(product.id)} src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSckjmVT1OZgpy0bFGkIAitjAu8Ed6_e2CLCA&s" width={30} alt="" />
-              </div>
-            </div>
-            <hr />
-          </div>
-        ))}
-      </div>
+      </Box>
       {editingProduct && (
         <EditProduct
           open={modalOpen}

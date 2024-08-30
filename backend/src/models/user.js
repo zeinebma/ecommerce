@@ -13,6 +13,7 @@ const User = sequelize.define('User', {
             isIn: [['user', 'admin']],
         },
     },
+
 });
 
 module.exports = User;

@@ -19,6 +19,7 @@ const cartRoute = require('./src/routes/cartRoute.js');
 const categoryRoute = require('./src/routes/categoryRoute.js');
 const orderRoutes = require('./src/routes/orderRoute.js');
 const stripeRoute = require('./src/routes/Stripe.js');
+const statistic = require('./src/routes/statisticRoute.js');
 
 app.use('/api/auth/', userRoute);
 app.use('/api/product/', productRoute);
@@ -26,6 +27,7 @@ app.use('/api/cart/', cartRoute);
 app.use('/api/category/', categoryRoute);
 app.use('/api/order/', orderRoutes);
 app.use('/api/stripe/', stripeRoute);
+app.use('/api/statistic/', statistic);
 
 app.get("/", (req, res) => {
   res.send("Root");

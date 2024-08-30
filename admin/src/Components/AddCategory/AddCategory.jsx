@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from "react";
-// import "./AddProduct.css";
-import upload_area from "../Assets/upload_area.svg";
+import React, { useState } from "react";
 import { backend_url } from "../../App";
 
 const AddCategory = () => {

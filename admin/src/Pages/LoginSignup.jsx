@@ -27,7 +27,7 @@ const LoginSignup = () => {
     try {
       const user = await fetchUserDetails();
       if (user.role === 'admin') {
-        window.location.replace('/listproduct')
+        window.location.replace('/')
       } else {
         alert('please try with correct email/password');
       }

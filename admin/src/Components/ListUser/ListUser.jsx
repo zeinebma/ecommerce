@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { format } from 'date-fns';
-import { backend_url, currency } from "../../App";
+import { backend_url } from "../../App";
 import EditUser from "../EditUser/EditUser";
 import axios from "axios";
-import { Button } from "@mui/material";
+import { Box, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, TextField } from "@mui/material";
 import UserModal from "./UserModal";
 import './ListUser.css'
 
@@ -14,6 +14,9 @@ const ListUser = () => {
     const [editingUser, setEditingUser] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [modalOpenAdmin, setModalOpenAdmin] = useState(false);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const addAdmin = async () => {
         try {
@@ -100,6 +103,22 @@ const ListUser = () => {
         return format(date, 'MM-dd-yyyy HH:mm');
     };
 
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
+    const filteredUsers = allUsers.filter(user =>
+        user.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
     return (
         <div className="listproduct">
             <h1>Users List</h1>
@@ -110,34 +129,65 @@ const ListUser = () => {
                     </div>
                 </Button>
             </div>
-            <div className="listproduct-format-main">
-                <p>ID</p> <p>Name</p> <p>Email</p> <p>Role</p> <p>Date</p>  <p>Actions</p>
-            </div>
-            <div className="listproduct-allproducts">
-                <hr />
-                {allUsers.map((e, index) => (
-                    <div key={index}>
-                        <div className="listproduct-format-main listproduct-format">
-                            <p>{e.id}</p>
-                            <p className="cartitems-product-title">{e.name}</p>
-                            <p>{e.email}</p>
-                            <p>{e.role}</p>
-                            <p>{formatDate(e.date)}</p>
-                            <div style={{ display: "flex", alignItems: "center", gap: '5px' }}>
-                                <img src="https://cdn-icons-png.flaticon.com/128/1828/1828911.png" width={30} style={{ cursor: 'pointer' }} onClick={() => handleEditClick(e)} />
-                                <img
-                                    className="listproduct-remove-icon"
-                                    onClick={() => removeUser(e.id)}
-                                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSckjmVT1OZgpy0bFGkIAitjAu8Ed6_e2CLCA&s"
-                                    alt="remove-icon"
-                                    width={30}
-                                />
-                            </div>
-                        </div>
-                        <hr />
-                    </div>
-                ))}
-            </div>
+            <TextField
+                label="Search Users"
+                variant="outlined"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                style={{ margin: '20px 0' }}
+                fullWidth
+            />
+            <TableContainer component={Paper}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>ID</TableCell>
+                            <TableCell>Name</TableCell>
+                            <TableCell>Email</TableCell>
+                            <TableCell>Role</TableCell>
+                            <TableCell>Date</TableCell>
+                            <TableCell align="right">Action</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((user, index) => (
+                            <TableRow key={index}>
+                                <TableCell>{user.id}</TableCell>
+                                <TableCell>{user.name}</TableCell>
+                                <TableCell>{user.email}</TableCell>
+                                <TableCell>{user.role}</TableCell>
+                                <TableCell>{formatDate(user.date)}</TableCell>
+                                <TableCell align="right" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                                    <img src="https://cdn-icons-png.flaticon.com/128/1828/1828911.png" width={30} style={{ cursor: 'pointer' }} onClick={() => handleEditClick(user)} />
+                                    <img className="listcategory-remove-icon" onClick={() => removeUser(user.id)} src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSckjmVT1OZgpy0bFGkIAitjAu8Ed6_e2CLCA&s" width={30} alt="" />
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+            <Box display="flex" justifyContent="center" width={500} mt={2}>
+                <TablePagination
+                    component="div"
+                    count={allUsers.length}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    rowsPerPage={rowsPerPage}
+                    style={{ width: '100%' }}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    rowsPerPageOptions={[5, 10, 25]}
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'flex-start',
+                        '& .MuiTablePagination-actions': {
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                        }
+                    }}
+                />
+            </Box>
             {editingUser && (
                 <EditUser
                     open={modalOpen}

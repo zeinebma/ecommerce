@@ -8,6 +8,7 @@ const ShopProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [cartItems, setCartItems] = useState({});
   const [user, setUser] = useState(null);
+  const [message, setMessage] = useState(false);
 
   const fetchUserDetails = async () => {
     try {
@@ -94,6 +95,10 @@ const ShopProvider = ({ children }) => {
       }, {
         headers: { 'auth-token': token }
       });
+      setMessage(true)
+      setTimeout(() => {
+        setMessage(false)
+      }, 3000);
 
       // Update state with the new cart item
       setCartItems((prevItems) => {
@@ -166,6 +171,7 @@ const ShopProvider = ({ children }) => {
         cartItems,
         user,
         addToCart,
+        message,
         removeCartItem,
         getTotalCartAmount,
         getTotalCartItems,

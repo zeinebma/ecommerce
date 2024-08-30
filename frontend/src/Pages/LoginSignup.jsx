@@ -25,7 +25,6 @@ const LoginSignup = () => {
       throw error;
     }
   };
-
   const handleRedirect = async () => {
     try {
       const user = await fetchUserDetails();
@@ -57,9 +56,9 @@ const LoginSignup = () => {
   const signup = async () => {
     try {
       const response = await axios.post('http://localhost:4000/api/auth/signup', formData);
-      navigate('/login');
-      console.log('Signup successful:', response.data);
+      window.location.replace('/login');
     } catch (error) {
+      console.error(error);
       alert("Signup failed: " + error.response.data.errors);
     }
   };

@@ -9,7 +9,7 @@ import AddCategory from "../Components/AddCategory/AddCategory";
 import NotFound from "../Components/error/notFound";
 import ListOrder from "../Components/ListOrder/ListOrder";
 import ListUser from "../Components/ListUser/ListUser";
-import AddUser from "../Components/ListUser/AddUser";
+import AdminDashboard from "../Components/Statistics/Statistic";
 
 
 const Admin = () => {
@@ -25,8 +25,7 @@ const Admin = () => {
         <Route path="/addcategory" element={<AddCategory />} />
         <Route path="/listorders" element={<ListOrder />} />
         <Route path="/users" element={<ListUser />} />
-        <Route path="/add" element={<AddUser />} />
-        <Route path="/" element={<AddUser />} />
+        <Route path="/" element={<AdminDashboard />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
