@@ -55,11 +55,11 @@ const LoginSignup = () => {
 
   const signup = async () => {
     try {
-      const response = await axios.post('http://localhost:4000/api/auth/signup', formData);
+      await axios.post('http://localhost:4000/api/auth/signup', formData);
       window.location.replace('/login');
     } catch (error) {
       console.error(error);
-      alert("Signup failed: " + error.response.data.errors);
+      alert(error.response.data.msg);
     }
   };
 

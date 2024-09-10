@@ -1,6 +1,7 @@
 const User = require('../models/user')
 const jwt = require("jsonwebtoken");
 const bcrypt = require('bcrypt');
+const { isValidEmail } = require('../Middlewares/userMiddleware');
 require('dotenv').config();
 
 
@@ -31,12 +32,21 @@ exports.signup = async (req, res) => {
         return res.status(400).json({ success: false, errors: "All fields (name, email, password) are required." });
     }
 
+    if (!isValidEmail(email)) {
+        return res.status(400).json({ msg: 'Invalid email address format.' });
+    }
+
     let success = false;
     let check = await User.findOne({ where: { email } });
     if (check) {
-        return res.status(400).json({ success, errors: "existing user found with this email" });
+        return res.status(400).json({ msg: "existing user found with this email" });
     }
 
+    if (password.length < 8 || !/[A-Z]/.test(password)) {
+        return res.status(400).json({
+            msg: 'Password at least 8 characters long, and contain at least one capital letter.'
+        });
+    }
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 

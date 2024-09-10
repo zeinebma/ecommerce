@@ -15,3 +15,8 @@ exports.fetchuser = async (req, res, next) => {
         return res.status(401).send({ errors: "Please authenticate using a valid token" });
     }
 };
+
+exports.isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+};
